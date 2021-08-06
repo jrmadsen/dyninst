@@ -370,6 +370,8 @@ bool Instrumenter::handleCondDirExits(RelocBlock *trace, RelocGraph *cfg, instPo
 
    RelocEdge *cond = trace->outs()->find(ParseAPI::COND_TAKEN);
 
+   if(!cond || !cond->trg) return false;
+   
    cfg->makeEdge(new Target<RelocBlock *>(instRelocBlock),
 		 cond->trg->copy(),
          NULL, 
