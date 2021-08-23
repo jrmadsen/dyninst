@@ -85,7 +85,7 @@ boost::shared_ptr<Type>>::type typeCollection::addOrUpdateType(boost::shared_ptr
 
 	if (a->second->getDataClass() == dataUnknownType)
 	{
-		upgradePlaceholder(a->second.get(), type.get());
+		a->second.get() = upgradePlaceholder(a->second.get(), type.get());
 	}
 	else
 	{
