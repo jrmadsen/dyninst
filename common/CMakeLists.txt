@@ -2,7 +2,7 @@
 
 if(NOT WIN32)
 include_directories (
-    ${PROJECT_SOURCE_DIR}/common/h 
+    ${PROJECT_SOURCE_DIR}/common/h
     ${PROJECT_SOURCE_DIR}/common/src
   )
 else()
@@ -16,27 +16,27 @@ endif()
 set (SRC_LIST
     src/pfq-rwlock.C
     src/concurrent.C
-    src/Timer.C 
-    src/Types.C 
+    src/Timer.C
+    src/Types.C
     src/lprintf.C
-    src/pathName.C 
-    src/stats.C 
-    src/Annotatable.C 
-    src/MappedFile.C 
-    src/sha1.C 
+    src/pathName.C
+    src/stats.C
+    src/Annotatable.C
+    src/MappedFile.C
+    src/sha1.C
     src/util.C
-    src/Node.C 
-    src/Graph.C 
-    src/Edge.C 
-    src/DOT.C 
-    src/dyn_regs.C 
-    src/AST.C 
-    src/addrtranslate.C 
-    src/arch-x86.C 
-    src/arch-power.C 
+    src/Node.C
+    src/Graph.C
+    src/Edge.C
+    src/DOT.C
+    src/dyn_regs.C
+    src/AST.C
+    src/addrtranslate.C
+    src/arch-x86.C
+    src/arch-power.C
 	src/arch-aarch64.C
-    src/debug_common.C 
-    src/VariableLocation.C 
+    src/debug_common.C
+    src/VariableLocation.C
     src/Buffer.C
     src/MachSyscall.C
   )
@@ -45,7 +45,7 @@ set (C_SRC_LIST
 )
 
 if (PLATFORM MATCHES freebsd)
-  set (SRC_LIST ${SRC_LIST} 
+  set (SRC_LIST ${SRC_LIST}
     src/freebsdKludges.C
     src/addrtranslate-sysv.C
     src/addrtranslate-freebsd.C
@@ -78,7 +78,7 @@ if (PLATFORM MATCHES cnl)
     src/addrtranslate-auxv.C
     src/addrtranslate-linux.C
   )
-endif()  
+endif()
 
 if (PLATFORM MATCHES nt OR PLATFORM MATCHES windows)
   set (SRC_LIST ${SRC_LIST}
@@ -88,7 +88,7 @@ if (PLATFORM MATCHES nt OR PLATFORM MATCHES windows)
     src/addrtranslate-win.C
   )
   add_definitions(-DWIN32 -D_WIN32_WINNT=0x500)
-endif()  
+endif()
 
 
 SET_SOURCE_FILES_PROPERTIES(${SRC_LIST} PROPERTIES LANGUAGE CXX)
@@ -124,6 +124,10 @@ endif()
 ADD_DEFINITIONS(-DCOMMON_LIB)
 
 dyninst_library(common)
+
+if(TARGET LibIberty-External)
+  add_dependencies(common LibIberty-External)
+endif()
 
 if(TARGET LibIberty)
   add_dependencies(common LibIberty)

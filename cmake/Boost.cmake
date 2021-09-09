@@ -21,7 +21,7 @@
 # Advanced options:
 #
 # Boost_DEBUG               - Enable debug output from FindBoost
-# Boost_NO_SYSTEM_PATHS     - Disable searching in locations not specified by hint variables 
+# Boost_NO_SYSTEM_PATHS     - Disable searching in locations not specified by hint variables
 #
 # Exports the following CMake cache variables
 #
@@ -113,7 +113,7 @@ list(APPEND _boost_defines -DBOOST_ALL_NO_LIB=1)
 
 # Disable generating serialization code in boost::multi_index
 list(APPEND _boost_defines -DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION)
-  
+
 # There are broken versions of MSVC that won't handle variadic templates
 # correctly (despite the C++11 test case passing).
 if(MSVC)
@@ -134,7 +134,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 #     This should _not_ be a cache variable
 set(_boost_components atomic chrono date_time filesystem system thread timer)
 
-find_package(Boost ${Boost_MIN_VERSION} COMPONENTS ${_boost_components})
+find_package(Boost ${Boost_MIN_VERSION} QUIET COMPONENTS ${_boost_components})
 
 # -------------- SOURCE BUILD -------------------------------------------------
 
@@ -150,7 +150,7 @@ elseif(NOT Boost_FOUND AND STERILE_BUILD)
 else()
   # If we didn't find a suitable version on the system, then download one from the web
   set(_boost_download_version "1.69.0")
-  
+
   # If the user specifies a version other than _boost_download_version, use that version.
   # NB: We know Boost_MIN_VERSION is >= _boost_min_version from earlier checks
   if(${Boost_MIN_VERSION} VERSION_LESS ${_boost_download_version} OR
@@ -161,32 +161,32 @@ else()
   message(STATUS "Attempting to build ${_boost_download_version} as external project")
 
   # This is an internal consistency check. Normal users should not trip this since
-  # they cannot affect _boost_download_version.  
+  # they cannot affect _boost_download_version.
   if(${_boost_download_version} VERSION_LESS ${Boost_MIN_VERSION})
     message(FATAL_ERROR "Download version of Boost (${_boost_download_version}) "
                         "is older than minimum allowed version (${Boost_MIN_VERSION})")
   endif()
-  
+
   if(Boost_USE_MULTITHREADED)
     set(_boost_threading multi)
   else()
     set(_boost_threading single)
   endif()
-  
+
   if(Boost_USE_STATIC_RUNTIME)
     set(_boost_runtime_link static)
   else()
     set(_boost_runtime_link shared)
   endif()
-  
+
   # Change the base directory
   set(Boost_ROOT_DIR ${CMAKE_INSTALL_PREFIX} CACHE PATH "Base directory the of Boost installation" FORCE)
 
-  # Update the exported variables  
+  # Update the exported variables
   set(Boost_INCLUDE_DIRS ${Boost_ROOT_DIR}/include CACHE PATH "Boost include directory" FORCE)
   set(Boost_LIBRARY_DIRS ${Boost_ROOT_DIR}/lib CACHE PATH "Boost library directory" FORCE)
   set(Boost_INCLUDE_DIR ${Boost_INCLUDE_DIRS} CACHE PATH "Boost include directory" FORCE)
-  
+
   set(BOOST_ARGS
       --ignore-site-config
       --link=static
@@ -234,7 +234,7 @@ else()
     set(Boost_LIBRARIES "")
     foreach(c ${_boost_components})
       list(APPEND Boost_LIBRARIES "optimized libboost_${c} debug libboost_${c}-gd ")
-      
+
       # Also export cache variables for the file location of each library
       string(TOUPPER ${c} _basename)
       set(Boost_${_basename}_LIBRARY_RELEASE "${Boost_LIBRARY_DIRS}/libboost_${c}.dll" CACHE FILEPATH "" FORCE)
@@ -246,7 +246,7 @@ else()
     set(Boost_LIBRARIES "")
     foreach(c ${_boost_components})
       list(APPEND Boost_LIBRARIES "${Boost_LIBRARY_DIRS}/libboost_${c}.so")
-      
+
       # Also export cache variables for the file location of each library
       string(TOUPPER ${c} _basename)
       set(Boost_${_basename}_LIBRARY_RELEASE "${Boost_LIBRARY_DIRS}/libboost_${c}.so" CACHE FILEPATH "" FORCE)

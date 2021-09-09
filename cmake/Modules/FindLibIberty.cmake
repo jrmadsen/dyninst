@@ -65,17 +65,18 @@ find_package_handle_standard_args(LibIberty
                                   FOUND_VAR
                                   LibIberty_FOUND
                                   REQUIRED_VARS
+                                  LibIberty_INCLUDE_DIRS
                                   LibIberty_LIBRARIES)
 
 # For backwards compatibility only
 set(IBERTY_FOUND ${LibIberty_FOUND})
 
 if(LibIberty_FOUND)
-  foreach(l in ${LibIberty_LIBRARIES})
+  foreach(l ${LibIberty_LIBRARIES})
     get_filename_component(_dir ${l} DIRECTORY)
     list(APPEND LibIberty_LIBRARY_DIRS ${_dir})
   endforeach()
-  
+
   # For backwards compatibility only
   set(IBERTY_LIBRARIES ${LibIberty_LIBRARIES})
 endif()

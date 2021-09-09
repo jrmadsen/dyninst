@@ -9,7 +9,7 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(STERILE_BUILD OFF CACHE BOOL "Do not download/build any third-party dependencies from source")
 
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES 
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
 	  "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 IF("${isSystemDir}" STREQUAL "-1")
 		    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
@@ -24,7 +24,7 @@ set (CMAKE_MODULE_PATH "${DYNINST_ROOT}/cmake" "${DYNINST_ROOT}/cmake/Modules" $
 include(LanguageStandards)
 
 # Find the necessary third-party libraries
-find_package(ThreadDB)
+find_package(Thread_DB)
 find_package(Threads)
 include(Boost)
 include(ThreadingBuildingBlocks)
@@ -131,7 +131,7 @@ if(BUILD_RTLIB)
   else()
     add_custom_target(DyninstRT
       ALL
-      $(MAKE)
+      COMMAND ${CMAKE_COMMAND} --build ${RT_BINARY_DIR} --target all
       WORKING_DIRECTORY ${RT_BINARY_DIR}
       COMMENT "Building DyninstRT")
     if(TARGET TBB)
@@ -233,5 +233,5 @@ endif()
 #add_subdirectory(testsuite)
 
 # Copy out all of the cmake files so they can be used by the Testsuite
-install(DIRECTORY ${DYNINST_ROOT}/cmake/ DESTINATION ${INSTALL_CMAKE_DIR})
-install(FILES ${PROJECT_BINARY_DIR}/CMakeCache.txt DESTINATION ${INSTALL_CMAKE_DIR})
+install(DIRECTORY ${DYNINST_ROOT}/cmake DESTINATION ${INSTALL_CMAKE_DIR})
+# install(FILES ${PROJECT_BINARY_DIR}/CMakeCache.txt DESTINATION ${INSTALL_CMAKE_DIR})

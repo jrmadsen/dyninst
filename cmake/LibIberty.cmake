@@ -41,7 +41,9 @@ set(LibIberty_LIBRARYDIR "${LibIberty_ROOT_DIR}/lib"
 
 # -------------- PACKAGES -----------------------------------------------------
 
-find_package(LibIberty)
+if(NOT DEFINED LibIberty_INTERNAL_BUILD OR NOT LibIberty_INTERNAL_BUILD)
+    find_package(LibIberty)
+endif()
 
 # -------------- SOURCE BUILD -------------------------------------------------
 if(LibIberty_FOUND)
@@ -57,7 +59,7 @@ else()
 
   include(ExternalProject)
   ExternalProject_Add(
-    LibIberty
+    LibIberty-External
     PREFIX ${CMAKE_BINARY_DIR}/binutils
     URL http://ftp.gnu.org/gnu/binutils/binutils-2.31.1.tar.gz
     BUILD_IN_SOURCE 1
@@ -75,10 +77,12 @@ else()
   set(_li_inc_dirs ${_li_root}/include)
   set(_li_lib_dirs ${_li_root}/lib)
   set(_li_libs ${_li_lib_dirs}/libiberty/libiberty.a)
-  
+
   # For backward compatibility
   set(IBERTY_FOUND TRUE)
   set(IBERTY_BUILD TRUE)
+
+  set(LibIberty_INTERNAL_BUILD ON CACHE BOOL "Internal installation")
 endif()
 
 # -------------- EXPORT VARIABLES ---------------------------------------------
@@ -87,18 +91,18 @@ add_library(LibIberty STATIC IMPORTED GLOBAL)
 set_target_properties(LibIberty PROPERTIES IMPORTED_LOCATION ${_li_libs})
 set_target_properties(LibIberty PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${_li_inc_dirs})
 
+if(LibIberty_INTERNAL_BUILD)
+    target_include_directories(LibIberty INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External/include>)
+endif()
+
 set(LibIberty_ROOT_DIR ${_li_root}
-    CACHE PATH "Base directory the of LibIberty installation"
-    FORCE)
+    CACHE PATH "Base directory the of LibIberty installation" FORCE)
 set(LibIberty_INCLUDE_DIRS ${_li_inc_dirs}
-    CACHE PATH "LibIberty include directories"
-    FORCE)
+    CACHE PATH "LibIberty include directories" FORCE)
 set(LibIberty_LIBRARY_DIRS ${_li_lib_dirs}
-    CACHE PATH "LibIberty library directory"
-    FORCE)
+    CACHE PATH "LibIberty library directory" FORCE)
 set(LibIberty_LIBRARIES ${_li_libs}
-    CACHE FILEPATH "LibIberty library files"
-    FORCE)
+    CACHE FILEPATH "LibIberty library files" FORCE)
 
 # For backward compatibility only
 set(IBERTY_LIBRARIES ${LibIberty_LIBRARIES})

@@ -1,5 +1,5 @@
 # CMake configuration for dyninstAPI_RT directory
-cmake_minimum_required (VERSION 2.6.4)
+cmake_minimum_required (VERSION 2.8.12)
 project (DyninstRT C)
 
 set (DYNINST_ROOT ${PROJECT_SOURCE_DIR}/..)
@@ -13,37 +13,37 @@ include_directories (
   )
 
 set (SRC_LIST
-    src/RTcommon.c 
+    src/RTcommon.c
     src/RTmemEmulator.c
 )
 
 if (PLATFORM MATCHES freebsd)
 set (SRC_LIST ${SRC_LIST}
     src/RTposix.c
-    src/RTfreebsd.c 
-    src/RTheap.c 
-    src/RTheap-freebsd.c 
-    src/RTthread.c 
-    src/RTspace.S 
-    src/RTsignal.c 
+    src/RTfreebsd.c
+    src/RTheap.c
+    src/RTheap-freebsd.c
+    src/RTthread.c
+    src/RTspace.S
+    src/RTsignal.c
 )
 elseif (PLATFORM MATCHES linux)
 set (SRC_LIST ${SRC_LIST}
-    src/RTposix.c 
-    src/RTlinux.c 
-    src/RTheap.c 
-    src/RTheap-linux.c 
-    src/RTthread.c 
-    src/RTspace.S 
+    src/RTposix.c
+    src/RTlinux.c
+    src/RTheap.c
+    src/RTheap-linux.c
+    src/RTthread.c
+    src/RTspace.S
     src/RTsignal.c
 )
 set (RT_STATIC_ONLY_SRC_LIST ${RT_STATIC_ONLY_SRC_LIST}
-    src/RTstatic_ctors_dtors_begin.c 
-    src/RTstatic_ctors_dtors_end.c 
+    src/RTstatic_ctors_dtors_begin.c
+    src/RTstatic_ctors_dtors_end.c
 )
 elseif (PLATFORM MATCHES nt OR PLATFORM MATCHES windows)
 set (SRC_LIST ${SRC_LIST}
-    src/RTheap.c 
+    src/RTheap.c
     src/RTheap-win.c
     src/RTwinnt.c
     src/RTthread.c
@@ -52,14 +52,14 @@ set (SRC_LIST ${SRC_LIST}
 endif ()
 
 set (SRC_LIST_i386
-    src/RTthread-x86.c 
-    src/RTtlsgetaddr-x86.S 
+    src/RTthread-x86.c
+    src/RTtlsgetaddr-x86.S
 )
 set (RT_STATIC_ONLY_SRC_LIST_i386
     src/RTstatic_ctors_dtors-x86.c
 )
 set (SRC_LIST_x86_64
-    src/RTthread-x86-64.c 
+    src/RTthread-x86-64.c
     src/RTtlsgetaddr-x86.S
 )
 set (RT_STATIC_ONLY_SRC_LIST_x86_64
@@ -77,20 +77,20 @@ set (SRC_LIST_ppc64
     src/RTthread-powerpc-asm.S
 )
 set (RT_STATIC_ONLY_SRC_LIST_ppc64
-    src/RTstatic_ctors_dtors-ppc64.c                                                                                         
+    src/RTstatic_ctors_dtors-ppc64.c
 )
 set (SRC_LIST_aarch64
     src/RTthread-aarch64.c
     #src/RTthread-aarch64-asm.S
 )
 set (RT_STATIC_ONLY_SRC_LIST_aarch64
-    src/RTstatic_ctors_dtors-aarch64.c                                                                                         
+    src/RTstatic_ctors_dtors-aarch64.c
 )
 
 
 # We use gcc to compile the various assembly files, but
 # cmake doesn't default to knowing that gcc can
-# handle .S. 
+# handle .S.
 ENABLE_LANGUAGE(ASM)
 file (GLOB SRC_ASSEMBLY "src/*.S")
 if(NEED_NATIVE_ASSEMBER MATCHES YES)
@@ -113,7 +113,7 @@ set (RT_STATIC_ONLY_SRC_LIST ${RT_STATIC_ONLY_SRC_LIST} ${RT_STATIC_ONLY_SRC_LIS
 elseif (PLATFORM MATCHES ppc64)
 set (SRC_LIST_mabi ${SRC_LIST} ${SRC_LIST_ppc32})
 set (RT_STATIC_ONLY_SRC_LIST_mabi ${RT_STATIC_ONLY_SRC_LIST} ${RT_STATIC_ONLY_SRC_LIST_ppc32})
-set (SRC_LIST ${SRC_LIST} ${SRC_LIST_ppc64}) 
+set (SRC_LIST ${SRC_LIST} ${SRC_LIST_ppc64})
 set (RT_STATIC_ONLY_SRC_LIST ${RT_STATIC_ONLY_SRC_LIST} ${RT_STATIC_ONLY_SRC_LIST_ppc64})
 elseif (PLATFORM MATCHES i386)
 set (SRC_LIST ${SRC_LIST} ${SRC_LIST_i386})
@@ -176,10 +176,10 @@ INSTALL (TARGETS dyninstAPI_RT dyninstAPI_RT_static
 
 # Test to see if we want the 32-bit library
 
-if (SRC_LIST_mabi) 
+if (SRC_LIST_mabi)
 
 # The following code is from CheckCCompilerFlag.cmake. It uses a
-# simple program that can be compiled even if 32-bit includes are 
+# simple program that can be compiled even if 32-bit includes are
 # missing; we need to extend it somewhat
 
 INCLUDE(CheckCSourceCompiles)
@@ -190,7 +190,7 @@ MACRO (CHECK_C_COMPILER_FLAG_EXTENDED _FLAG _RESULT)
 
 # Addition here: use signal.h
    CHECK_C_SOURCE_COMPILES("#include <signal.h>
-   int main(void) { return 0; }" 
+   int main(void) { return 0; }"
         ${_RESULT}
 # End addition
      # Some compilers do not fail with a bad flag

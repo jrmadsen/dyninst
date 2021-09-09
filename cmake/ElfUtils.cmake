@@ -38,7 +38,7 @@ endif()
 
 # Minimum acceptable version of elfutils
 # NB: We need >=0.178 because libdw isn't thread-safe before then
-set(_min_version 0.178)
+set(_min_version 0.182)
 
 set(ElfUtils_MIN_VERSION ${_min_version}
     CACHE STRING "Minimum acceptable elfutils version")
@@ -112,7 +112,7 @@ else()
 
   message(STATUS "${ElfUtils_ERROR_REASON}")
   message( STATUS "Attempting to build elfutils(${_elfutils_download_version}) as external project")
-  
+
   if(NOT (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU") OR NOT (${CMAKE_C_COMPILER_ID} STREQUAL "GNU"))
     message(FATAL_ERROR "ElfUtils will only build with the GNU compiler")
   endif()
@@ -129,6 +129,7 @@ else()
       <SOURCE_DIR>/configure
       --enable-install-elfh
       --prefix=${CMAKE_INSTALL_PREFIX}
+      --disable-libdebuginfod
       --disable-debuginfod
     BUILD_COMMAND make install
     INSTALL_COMMAND ""

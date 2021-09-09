@@ -44,7 +44,7 @@ include (FindPackageHandleStandardArgs)
 
 # handle the QUIETLY and REQUIRED arguments and set THREAD_DB_FOUND to TRUE
 # if all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Thread_Db DEFAULT_MSG
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Thread_DB DEFAULT_MSG
     THREAD_DB_LIBRARIES
     THREAD_DB_INCLUDE_DIR)
 
