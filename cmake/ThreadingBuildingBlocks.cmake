@@ -181,7 +181,7 @@ endif()
 
 if(TARGET TBB-External)
     target_include_directories(TBB INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/tbb/src/TBB/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/tbb/src/TBB-External/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
     target_compile_definitions(TBB INTERFACE
         ${TBB_DEFINITIONS})
