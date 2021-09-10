@@ -74,7 +74,9 @@ else()
   )
 
   set(_li_root ${CMAKE_INSTALL_PREFIX})
-  set(_li_inc_dirs ${_li_root}/include)
+  set(_li_inc_dirs
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External/include>
+    $<INSTALL_INTERFACE:${_li_root}/include>)
   set(_li_lib_dirs ${_li_root}/lib)
   set(_li_libs ${_li_lib_dirs}/libiberty/libiberty.a)
 
@@ -89,10 +91,11 @@ endif()
 
 add_library(LibIberty STATIC IMPORTED GLOBAL)
 set_target_properties(LibIberty PROPERTIES IMPORTED_LOCATION ${_li_libs})
-set_target_properties(LibIberty PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${_li_inc_dirs})
 
-if(Dyninst_LibIberty_INTERNAL_BUILD)
-    target_include_directories(LibIberty INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External/include>)
+if(NOT Dyninst_LibIberty_INTERNAL_BUILD)
+    set_target_properties(LibIberty PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${_li_inc_dirs})
+else()
+    target_include_directories(LibIberty INTERFACE ${_li_inc_dirs})
 endif()
 
 set(LibIberty_ROOT_DIR ${_li_root}
