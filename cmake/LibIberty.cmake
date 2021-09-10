@@ -41,7 +41,7 @@ set(LibIberty_LIBRARYDIR "${LibIberty_ROOT_DIR}/lib"
 
 # -------------- PACKAGES -----------------------------------------------------
 
-if(NOT DEFINED LibIberty_INTERNAL_BUILD OR NOT LibIberty_INTERNAL_BUILD)
+if(NOT Dyninst_BUILD_LIBIBERTY AND NOT Dyninst_LibIberty_INTERNAL_BUILD)
     find_package(LibIberty)
 endif()
 
@@ -82,7 +82,7 @@ else()
   set(IBERTY_FOUND TRUE)
   set(IBERTY_BUILD TRUE)
 
-  set(LibIberty_INTERNAL_BUILD ON CACHE BOOL "Internal installation")
+  set(Dyninst_LibIberty_INTERNAL_BUILD ON CACHE BOOL "Internal installation" FORCE)
 endif()
 
 # -------------- EXPORT VARIABLES ---------------------------------------------
@@ -91,7 +91,7 @@ add_library(LibIberty STATIC IMPORTED GLOBAL)
 set_target_properties(LibIberty PROPERTIES IMPORTED_LOCATION ${_li_libs})
 set_target_properties(LibIberty PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${_li_inc_dirs})
 
-if(LibIberty_INTERNAL_BUILD)
+if(Dyninst_LibIberty_INTERNAL_BUILD)
     target_include_directories(LibIberty INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External/include>)
 endif()
 

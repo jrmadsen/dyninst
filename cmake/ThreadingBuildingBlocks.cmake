@@ -81,7 +81,9 @@ set(TBB_INCLUDE_DIR ${TBB_INCLUDEDIR})
 # NB: This should _NOT_ be a cache variable
 set(_tbb_components tbb tbbmalloc tbbmalloc_proxy)
 
-find_package(TBB ${TBB_MIN_VERSION} COMPONENTS ${_tbb_components})
+if(NOT Dyninst_BUILD_TBB AND NOT Dyninst_TBB_INTERNAL_BUILD)
+    find_package(TBB ${TBB_MIN_VERSION} COMPONENTS ${_tbb_components})
+endif()
 
 # -------------- SOURCE BUILD -------------------------------------------------
 if(TBB_FOUND)
@@ -91,7 +93,7 @@ if(TBB_FOUND)
   set(TBB_LIBRARY_DIRS ${TBB_LIBRARY_DIRS} CACHE PATH "TBB library directory" FORCE)
   set(TBB_DEFINITIONS ${TBB_DEFINITIONS} CACHE STRING "TBB compiler definitions" FORCE)
   set(TBB_LIBRARIES ${TBB_LIBRARIES} CACHE FILEPATH "TBB library files" FORCE)
-  
+
   if(NOT TARGET TBB)
     add_library(TBB SHARED IMPORTED)
   endif()
@@ -101,7 +103,7 @@ else()
   # If we didn't find a suitable version on the system, then download one from the web
   message(STATUS "${ThreadingBuildingBlocks_ERROR_REASON}")
   message(STATUS "Attempting to build TBB(${TBB_MIN_VERSION}) as external project")
-  
+
   if(NOT UNIX)
     message(FATAL_ERROR "Building TBB from source is not supported on this platform")
   endif()
@@ -123,22 +125,22 @@ else()
   	else()
   	  list(APPEND _tbb_components_cfg ${c}_release)
   	endif()
-  	
+
   	# Generate library filenames
   	list(APPEND _tbb_libraries "${TBB_LIBRARY_DIRS}/lib${c}.so")
-  	
+
     foreach(t RELEASE DEBUG)
       set(TBB_${c}_LIBRARY_${t} "${TBB_LIBRARY_DIRS}/lib${c}.so" CACHE FILEPATH "" FORCE)
     endforeach()
   endforeach()
-  
+
   set(TBB_LIBRARIES ${_tbb_libraries} CACHE FILEPATH "TBB library files" FORCE)
-  
+
   # Split the dotted decimal version into major/minor parts
   string(REGEX REPLACE "\\." ";" _tbb_download_name ${TBB_MIN_VERSION})
   list(GET _tbb_download_name 0 _tbb_ver_major)
   list(GET _tbb_download_name 1 _tbb_ver_minor)
-  
+
   include(ExternalProject)
   set(_tbb_prefix_dir ${CMAKE_BINARY_DIR}/tbb)
 
@@ -148,9 +150,9 @@ else()
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   	set(_tbb_compiler "compiler=clang")
   endif()
-  
+
   ExternalProject_Add(
-    TBB
+    TBB-External
     PREFIX ${_tbb_prefix_dir}
     URL https://github.com/01org/tbb/archive/${_tbb_ver_major}_U${_tbb_ver_minor}.tar.gz
     BUILD_IN_SOURCE 1
@@ -169,8 +171,26 @@ else()
         -DPREFIX=${_tbb_prefix_dir}
       	-P ${CMAKE_CURRENT_LIST_DIR}/ThreadingBuildingBlocks.install.cmake
   )
+  set(Dyninst_TBB_INTERNAL_BUILD ON CACHE BOOL "Internal installation" FORCE)
+
 endif()
- 
+
+if(NOT TARGET TBB)
+    add_library(TBB INTERFACE IMPORTED GLOBAL)
+endif()
+
+if(TARGET TBB-External)
+    target_include_directories(TBB INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/tbb/src/TBB/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+    target_compile_definitions(TBB INTERFACE
+        ${TBB_DEFINITIONS})
+    target_link_libraries(TBB INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/tbb/src/tbb_release/libtbb${CMAKE_SHARED_LIBRARY_SUFFIX}>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/tbb/src/tbb_release/libtbbmalloc${CMAKE_SHARED_LIBRARY_SUFFIX}>
+        $<INSTALL_INTERFACE:${TBB_LIBRARIES}>)
+endif()
+
 include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
 link_directories(${TBB_LIBRARY_DIRS})
 

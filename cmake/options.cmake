@@ -14,6 +14,8 @@ option(BUILD_RTLIB "Building runtime library (can be disabled safely for compone
 option(BUILD_DOCS "Build manuals from LaTeX sources" OFF)
 option (ENABLE_LTO "Enable Link-Time Optimization" OFF)
 option(ENABLE_DEBUGINFOD "Enable debuginfod support" OFF)
+option(Dyninst_BUILD_LIBIBERTY "Enable building libiberty internally" OFF)
+option(Dyninst_BUILD_TBB "Enable building TBB internally" OFF)
 
 # Some global on/off switches
 if (LIGHTWEIGHT_SYMTAB)
