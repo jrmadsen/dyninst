@@ -22,11 +22,11 @@ endif()
 mark_as_advanced(DYNINST_OPTION_PREFIX)
 mark_as_advanced(DYNINST_QUIET_CONFIG)
 
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # message which handles DYNINST_QUIET_CONFIG settings
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
-FUNCTION(DYNINST_MESSAGE TYPE)
+function(DYNINST_MESSAGE TYPE)
     if("${TYPE}" STREQUAL "FATAL_ERROR")
         message(${TYPE} "[dyninst] ${ARGN}")
     else()
@@ -34,10 +34,9 @@ FUNCTION(DYNINST_MESSAGE TYPE)
             message(${TYPE} "[dyninst] ${ARGN}")
         endif()
     endif()
-ENDFUNCTION()
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------#
 # call before running check_{c,cxx}_compiler_flag
 #
 macro(DYNINST_BEGIN_FLAG_CHECK)
@@ -50,8 +49,7 @@ macro(DYNINST_BEGIN_FLAG_CHECK)
     endif()
 endmacro()
 
-
-#----------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------#
 # call after running check_{c,cxx}_compiler_flag
 #
 macro(DYNINST_END_FLAG_CHECK)
@@ -61,11 +59,10 @@ macro(DYNINST_END_FLAG_CHECK)
     endif()
 endmacro()
 
-
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # Apply operation to a global property list
 #
-FUNCTION(DYNINST_APPEND_PROPERTY_LIST _PROP)
+function(DYNINST_APPEND_PROPERTY_LIST _PROP)
     get_property(_ENTRY GLOBAL PROPERTY ${_PROP})
     set(_ARGS ${ARGN})
     if(_ARGS)
@@ -76,30 +73,30 @@ FUNCTION(DYNINST_APPEND_PROPERTY_LIST _PROP)
             set_property(GLOBAL APPEND PROPERTY ${_PROP} ${_ARG})
         endif()
     endforeach()
-ENDFUNCTION()
+endfunction()
 
-
-#-----------------------------------------------------------------------
-# function dyninst_get_property(<NAME> <NAMES...>)
-#          Defines a local variable with the value of the global property, e.g.
+# -----------------------------------------------------------------------
+# function dyninst_get_property(<NAME> <NAMES...>) Defines a local variable with the value
+# of the global property, e.g.
 #
-#               dyninst_get_property(Dyninst_ENABLED_INTERFACES)
-#               message(STATUS "Dyninst enabled interfaces: ${Dyninst_ENABLE_INTERFACES}")
+# dyninst_get_property(Dyninst_ENABLED_INTERFACES) message(STATUS "Dyninst enabled
+# interfaces: ${Dyninst_ENABLE_INTERFACES}")
 #
-FUNCTION(DYNINST_GET_PROPERTY _prop)
+function(DYNINST_GET_PROPERTY _prop)
     set(_ENTRIES)
     foreach(_ARG ${_prop} ${ARGN})
         get_property(_ENTRY GLOBAL PROPERTY ${_ARG})
         list(APPEND _ENTRIES ${_ENTRY})
     endforeach()
-    set(${_prop} ${_ENTRIES} PARENT_SCOPE)
-ENDFUNCTION()
+    set(${_prop}
+        ${_ENTRIES}
+        PARENT_SCOPE)
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------#
 # macro to add an interface lib
 #
-FUNCTION(DYNINST_ADD_INTERFACE_LIBRARY _TARGET)
+function(DYNINST_ADD_INTERFACE_LIBRARY _TARGET)
     # add the build-tree target
     add_library(${_TARGET} INTERFACE)
     # create an alias which is identical to the one in the install tree
@@ -111,58 +108,62 @@ FUNCTION(DYNINST_ADD_INTERFACE_LIBRARY _TARGET)
         set(INSTALL_CMAKE_DIR lib/cmake/${PROJECT_NAME})
     endif()
     # installation
-    install(TARGETS ${_TARGET}
+    install(
+        TARGETS ${_TARGET}
         EXPORT ${_TARGET}Targets
         COMPONENT ${_TARGET})
-    install(EXPORT ${_TARGET}Targets
+    install(
+        EXPORT ${_TARGET}Targets
         NAMESPACE ${PROJECT_NAME}::
         DESTINATION ${INSTALL_CMAKE_DIR})
     # build tree
-    export(TARGETS  ${_TARGET}
-        NAMESPACE   ${PROJECT_NAME}::
-        FILE        ${PROJECT_BINARY_DIR}/build-tree/${_TARGET}Targets.cmake
+    export(
+        TARGETS ${_TARGET}
+        NAMESPACE ${PROJECT_NAME}::
+        FILE ${PROJECT_BINARY_DIR}/build-tree/${_TARGET}Targets.cmake
         EXPORT_LINK_INTERFACE_LIBRARIES)
-ENDFUNCTION()
+endfunction()
 
-
-#-----------------------------------------------------------------------
-# function dyninst_add_feature(<NAME> <DOCSTRING>)
-#          Add a project feature, whose activation is specified by the
-#          existence of the variable <NAME>, to the list of enabled/disabled
-#          features, plus a docstring describing the feature
+# -----------------------------------------------------------------------
+# function dyninst_add_feature(<NAME> <DOCSTRING>) Add a project feature, whose activation
+# is specified by the existence of the variable <NAME>, to the list of enabled/disabled
+# features, plus a docstring describing the feature
 #
-FUNCTION(DYNINST_ADD_FEATURE _var _description)
+function(DYNINST_ADD_FEATURE _var _description)
     if(DYNINST_OPTION_PREFIX AND NOT "${_var}" MATCHES "^DYNINST_")
         set(_var DYNINST_${_var})
     endif()
     set(EXTRA_DESC "")
     foreach(currentArg ${ARGN})
-        if(NOT "${currentArg}" STREQUAL "${_var}" AND
-            NOT "${currentArg}" STREQUAL "${_description}")
+        if(NOT "${currentArg}" STREQUAL "${_var}" AND NOT "${currentArg}" STREQUAL
+                                                      "${_description}")
             set(EXTRA_DESC "${EXTRA_DESC}${currentArg}")
         endif()
     endforeach()
 
     set_property(GLOBAL APPEND PROPERTY ${PROJECT_NAME}_FEATURES ${_var})
     set_property(GLOBAL PROPERTY ${_var}_DESCRIPTION "${_description}${EXTRA_DESC}")
-ENDFUNCTION()
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
-# function add_option(<OPTION_NAME> <DOCSRING> <DEFAULT_SETTING> [ADVANCED])
-#          Add an option and add as a feature if ADVANCED is not provided
+# ----------------------------------------------------------------------------------------#
+# function add_option(<OPTION_NAME> <DOCSRING> <DEFAULT_SETTING> [ADVANCED]) Add an option
+# and add as a feature if ADVANCED is not provided
 #
-FUNCTION(DYNINST_ADD_OPTION _NAME _MESSAGE _DEFAULT)
+function(DYNINST_ADD_OPTION _NAME _MESSAGE _DEFAULT)
     if(DYNINST_OPTION_PREFIX)
         option(DYNINST_${_NAME} "${_MESSAGE}" ${_DEFAULT})
         # set the option locally for this project
-        set(${_NAME} ${DYNINST_${_NAME}} PARENT_SCOPE)
+        set(${_NAME}
+            ${DYNINST_${_NAME}}
+            PARENT_SCOPE)
         # for after this if/else
         set(_NAME DYNINST_${_NAME})
     else()
         option(${_NAME} "${_MESSAGE}" ${_DEFAULT})
         # set the option locally for this project
-        set(DYNINST_${_NAME} ${${_NAME}} PARENT_SCOPE)
+        set(DYNINST_${_NAME}
+            ${${_NAME}}
+            PARENT_SCOPE)
     endif()
     # mark as advanced or add as feature
     if("ADVANCED" IN_LIST ARGN)
@@ -170,24 +171,27 @@ FUNCTION(DYNINST_ADD_OPTION _NAME _MESSAGE _DEFAULT)
     else()
         dyninst_add_feature(${_NAME} "${_MESSAGE}")
     endif()
-ENDFUNCTION()
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
-# function dyninst_add_cache_option(<same args as setting cache variable>)
-#          Add an option and add as a feature
+# ----------------------------------------------------------------------------------------#
+# function dyninst_add_cache_option(<same args as setting cache variable>) Add an option
+# and add as a feature
 #
-FUNCTION(DYNINST_ADD_CACHE_OPTION _NAME _VALUE _PROP _TYPE _HELPSTRING)
+function(DYNINST_ADD_CACHE_OPTION _NAME _VALUE _PROP _TYPE _HELPSTRING)
     if(DYNINST_OPTION_PREFIX)
         set(DYNINST_${_NAME} "${_VALUE}" ${_PROP} ${_TYPE} "${_HELPSTRING}" ${ARGN})
         # set the option locally for this project
-        set(${_NAME} ${DYNINST_${_NAME}} PARENT_SCOPE)
+        set(${_NAME}
+            ${DYNINST_${_NAME}}
+            PARENT_SCOPE)
         # for after this if/else
         set(_NAME DYNINST_${_NAME})
     else()
         set(${_NAME} "${_VALUE}" ${_PROP} ${_TYPE} "${_HELPSTRING}" ${ARGN})
         # set the option locally for this project
-        set(DYNINST_${_NAME} ${${_NAME}} PARENT_SCOPE)
+        set(DYNINST_${_NAME}
+            ${${_NAME}}
+            PARENT_SCOPE)
     endif()
     # mark as advanced or add as feature
     if("ADVANCED" IN_LIST ARGN)
@@ -195,28 +199,42 @@ FUNCTION(DYNINST_ADD_CACHE_OPTION _NAME _VALUE _PROP _TYPE _HELPSTRING)
     else()
         dyninst_add_feature(${_NAME} "${_HELPSTRING}")
     endif()
-ENDFUNCTION()
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
-# function dyninst_force_option(<NAME> <VALUE>)
-#       Force a cache variable to be updated to another value
-#       Primary benefit over doing it manually is that it preserves the help-string
-#       and value type and synchronizes the local variables according to the
-#       DYNINST_OPTION_PREFIX
+# ----------------------------------------------------------------------------------------#
+# function dyninst_force_option(<NAME> <VALUE>) Force a cache variable to be updated to
+# another value Primary benefit over doing it manually is that it preserves the
+# help-string and value type and synchronizes the local variables according to the
+# DYNINST_OPTION_PREFIX
 #
-FUNCTION(DYNINST_FORCE_OPTION _NAME _VALUE)
+function(DYNINST_FORCE_OPTION _NAME _VALUE)
     # updated non DYNINST_ prefixed version if in cache
     if(NOT "$CACHE{${_NAME}}" STREQUAL "")
-        get_property(_TYPE CACHE ${_NAME} PROPERTY TYPE)
-        get_property(_DESC CACHE ${_NAME} PROPERTY HELPSTRING)
-        set(${_NAME} ${_VALUE} CACHE ${_TYPE} "${_DESC}" FORCE)
+        get_property(
+            _TYPE
+            CACHE ${_NAME}
+            PROPERTY TYPE)
+        get_property(
+            _DESC
+            CACHE ${_NAME}
+            PROPERTY HELPSTRING)
+        set(${_NAME}
+            ${_VALUE}
+            CACHE ${_TYPE} "${_DESC}" FORCE)
     endif()
     # update DYNINST_ prefixed version if in cache
     if(NOT "$CACHE{DYNINST_${_NAME}}" STREQUAL "")
-        get_property(_TYPE CACHE DYNINST_${_NAME} PROPERTY TYPE)
-        get_property(_DESC CACHE DYNINST_${_NAME} PROPERTY HELPSTRING)
-        set(DYNINST_${_NAME} ${_VALUE} CACHE ${_TYPE} "${_DESC}" FORCE)
+        get_property(
+            _TYPE
+            CACHE DYNINST_${_NAME}
+            PROPERTY TYPE)
+        get_property(
+            _DESC
+            CACHE DYNINST_${_NAME}
+            PROPERTY HELPSTRING)
+        set(DYNINST_${_NAME}
+            ${_VALUE}
+            CACHE ${_TYPE} "${_DESC}" FORCE)
     endif()
     # ensure the local variable is updated
     if(DEFINED ${_NAME})
@@ -225,22 +243,23 @@ FUNCTION(DYNINST_FORCE_OPTION _NAME _VALUE)
     if(DEFINED DYNINST_${_NAME})
         set(DYNINST_${_NAME} ${_VALUE})
     endif()
-ENDFUNCTION()
+endfunction()
 
-#----------------------------------------------------------------------------------------#
-# function print_enabled_features()
-#          Print enabled  features plus their docstrings.
+# ----------------------------------------------------------------------------------------#
+# function print_enabled_features() Print enabled  features plus their docstrings.
 #
-FUNCTION(DYNINST_PRINT_ENABLED_FEATURES)
-    FUNCTION(DYNINST_CAPITALIZE str var)
+function(DYNINST_PRINT_ENABLED_FEATURES)
+    function(DYNINST_CAPITALIZE str var)
         # make string lower
         string(TOLOWER "${str}" str)
         string(SUBSTRING "${str}" 0 1 _first)
         string(TOUPPER "${_first}" _first)
         string(SUBSTRING "${str}" 1 -1 _remainder)
         string(CONCAT str "${_first}" "${_remainder}")
-        set(${var} "${str}" PARENT_SCOPE)
-    ENDFUNCTION()
+        set(${var}
+            "${str}"
+            PARENT_SCOPE)
+    endfunction()
     set(_basemsg "The following features are defined/enabled (+):")
     set(_currentFeatureText "${_basemsg}")
     get_property(_features GLOBAL PROPERTY ${PROJECT_NAME}_FEATURES)
@@ -256,11 +275,13 @@ FUNCTION(DYNINST_PRINT_ENABLED_FEATURES)
             get_property(_desc GLOBAL PROPERTY ${_feature}_DESCRIPTION)
             # print description, if not standard ON/OFF, print what is set to
             if(_desc)
-                if(NOT "${${_feature}}" STREQUAL "ON" AND
-                   NOT "${${_feature}}" STREQUAL "TRUE")
-                    set(_currentFeatureText "${_currentFeatureText}: ${_desc} -- [\"${${_feature}}\"]")
+                if(NOT "${${_feature}}" STREQUAL "ON" AND NOT "${${_feature}}" STREQUAL
+                                                          "TRUE")
+                    set(_currentFeatureText
+                        "${_currentFeatureText}: ${_desc} -- [\"${${_feature}}\"]")
                 else()
-                    string(REGEX REPLACE "^${PROJECT_NAME}_USE_" "" _feature_tmp "${_feature}")
+                    string(REGEX REPLACE "^${PROJECT_NAME}_USE_" "" _feature_tmp
+                                         "${_feature}")
                     string(TOLOWER "${_feature_tmp}" _feature_tmp_l)
                     dyninst_capitalize("${_feature_tmp}" _feature_tmp_c)
                     foreach(_var _feature _feature_tmp _feature_tmp_l _feature_tmp_c)
@@ -281,14 +302,13 @@ FUNCTION(DYNINST_PRINT_ENABLED_FEATURES)
     if(NOT "${_currentFeatureText}" STREQUAL "${_basemsg}")
         dyninst_message(STATUS "${_currentFeatureText}\n")
     endif()
-ENDFUNCTION()
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
-# function dyninst_print_disabled_features()
-#          Print disabled features plus their docstrings.
+# ----------------------------------------------------------------------------------------#
+# function dyninst_print_disabled_features() Print disabled features plus their
+# docstrings.
 #
-FUNCTION(DYNINST_PRINT_DISABLED_FEATURES)
+function(DYNINST_PRINT_DISABLED_FEATURES)
     set(_basemsg "The following features are NOT defined/enabled (-):")
     set(_currentFeatureText "${_basemsg}")
     get_property(_features GLOBAL PROPERTY ${PROJECT_NAME}_FEATURES)
@@ -303,8 +323,8 @@ FUNCTION(DYNINST_PRINT_DISABLED_FEATURES)
             get_property(_desc GLOBAL PROPERTY ${_feature}_DESCRIPTION)
 
             if(_desc)
-              set(_currentFeatureText "${_currentFeatureText}: ${_desc}")
-              set(_desc NOTFOUND)
+                set(_currentFeatureText "${_currentFeatureText}: ${_desc}")
+                set(_desc NOTFOUND)
             endif(_desc)
         endif()
     endforeach(_feature)
@@ -312,18 +332,15 @@ FUNCTION(DYNINST_PRINT_DISABLED_FEATURES)
     if(NOT "${_currentFeatureText}" STREQUAL "${_basemsg}")
         dyninst_message(STATUS "${_currentFeatureText}\n")
     endif()
-ENDFUNCTION()
+endfunction()
 
-
-#----------------------------------------------------------------------------------------#
-# function dyninst_print_features()
-#          Print all features plus their docstrings.
+# ----------------------------------------------------------------------------------------#
+# function dyninst_print_features() Print all features plus their docstrings.
 #
-FUNCTION(DYNINST_PRINT_FEATURES)
+function(DYNINST_PRINT_FEATURES)
     dyninst_message(STATUS "")
     dyninst_print_enabled_features()
     dyninst_print_disabled_features()
-ENDFUNCTION()
-
+endfunction()
 
 cmake_policy(POP)

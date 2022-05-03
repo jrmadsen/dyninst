@@ -1,6 +1,6 @@
 # CMake configuration for instructionAPI directory
 
-set (SRC_LIST
+set(SRC_LIST
     src/Instruction.C
     src/InstructionAST.C
     src/Operation.C
@@ -16,64 +16,72 @@ set (SRC_LIST
     src/InstructionDecoder-x86.C
     src/InstructionDecoder-power.C
     src/InstructionDecoder-aarch64.C
-     src/AMDGPU/vega/InstructionDecoder-amdgpu-vega.C
-     src/AMDGPU/cdna2/InstructionDecoder-amdgpu-cdna2.C
-    src/InstructionDecoderImpl.C
-)
+    src/AMDGPU/vega/InstructionDecoder-amdgpu-vega.C
+    src/AMDGPU/cdna2/InstructionDecoder-amdgpu-cdna2.C
+    src/InstructionDecoderImpl.C)
 
 set_source_files_properties(${SRC_LIST} PROPERTIES LANGUAGE CXX)
 
 set(instructionDecoderPowerExtraFlags "")
-if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_CXX_COMPILER_VERSION} MATCHES "^([1-9]|1[01])(\.|$)")
-    # Disable var-tracking-assignments for InstructionDecoder-power.C for
-    # all known versions of gcc..  The default max size is too small so it
-    # fails, and adjusting it using
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_CXX_COMPILER_VERSION} MATCHES
+                                              "^([1-9]|1[01])(\.|$)")
+    # Disable var-tracking-assignments for InstructionDecoder-power.C for all known
+    # versions of gcc..  The default max size is too small so it fails, and adjusting it
+    # using
     #
-    #   PROPERTIES COMPILE_FLAGS "--param=max-vartrack-size=900000000"
+    # PROPERTIES COMPILE_FLAGS "--param=max-vartrack-size=900000000"
     #
     # succeeds, but the object file produced is >1GB, so disable it.
     string(APPEND instructionDecoderPowerExtraFlags "-fno-var-tracking-assignments")
 endif()
 
 # adjust warning threshold if set in cmake/warnings.cmake
-if (debugMaxFrameSizeOverridePowerOpcodeTable)
-        string(APPEND instructionDecoderPowerExtraFlags
-                " $<$<CONFIG:DEBUG>:-Wframe-larger-than=${debugMaxFrameSizeOverridePowerOpcodeTable}>")
+if(debugMaxFrameSizeOverridePowerOpcodeTable)
+    string(
+        APPEND
+        instructionDecoderPowerExtraFlags
+        " $<$<CONFIG:DEBUG>:-Wframe-larger-than=${debugMaxFrameSizeOverridePowerOpcodeTable}>"
+        )
 endif()
 
-if (nonDebugMaxFrameSizeOverridePowerOpcodeTable)
-        string(APPEND instructionDecoderPowerExtraFlags
-                " $<$<NOT:$<CONFIG:DEBUG>>:-Wframe-larger-than=${nonDebugMaxFrameSizeOverridePowerOpcodeTable}>")
+if(nonDebugMaxFrameSizeOverridePowerOpcodeTable)
+    string(
+        APPEND
+        instructionDecoderPowerExtraFlags
+        " $<$<NOT:$<CONFIG:DEBUG>>:-Wframe-larger-than=${nonDebugMaxFrameSizeOverridePowerOpcodeTable}>"
+        )
 endif()
 
-if (NOT instructionDecoderPowerExtraFlags STREQUAL "")
-    SET_SOURCE_FILES_PROPERTIES(src/InstructionDecoder-power.C
-            PROPERTIES COMPILE_FLAGS "${instructionDecoderPowerExtraFlags}")
+if(NOT instructionDecoderPowerExtraFlags STREQUAL "")
+    set_source_files_properties(
+        src/InstructionDecoder-power.C PROPERTIES COMPILE_FLAGS
+                                                  "${instructionDecoderPowerExtraFlags}")
 endif()
 
 set(finalizeOperandsExtraFlags "")
-if (debugMaxFrameSizeOverrideFinalizeOperands)
-        string(APPEND finalizeOperandsExtraFlags
-                " $<$<CONFIG:DEBUG>:-Wframe-larger-than=${debugMaxFrameSizeOverrideFinalizeOperands}>")
+if(debugMaxFrameSizeOverrideFinalizeOperands)
+    string(
+        APPEND
+        finalizeOperandsExtraFlags
+        " $<$<CONFIG:DEBUG>:-Wframe-larger-than=${debugMaxFrameSizeOverrideFinalizeOperands}>"
+        )
 endif()
-if (nonDebugMaxFrameSizeOverrideFinalizeOperands)
-        string(APPEND finalizeOperandsExtraFlags
-                " $<$<NOT:$<CONFIG:DEBUG>>:-Wframe-larger-than=${nonDebugMaxFrameSizeOverrideFinalizeOperands}>")
+if(nonDebugMaxFrameSizeOverrideFinalizeOperands)
+    string(
+        APPEND
+        finalizeOperandsExtraFlags
+        " $<$<NOT:$<CONFIG:DEBUG>>:-Wframe-larger-than=${nonDebugMaxFrameSizeOverrideFinalizeOperands}>"
+        )
 endif()
 
-if (NOT finalizeOperandsExtraFlags STREQUAL "")
-    SET_SOURCE_FILES_PROPERTIES(src/AMDGPU/cdna2/InstructionDecoder-amdgpu-cdna2.C
-            PROPERTIES COMPILE_FLAGS "${finalizeOperandsExtraFlags}")
+if(NOT finalizeOperandsExtraFlags STREQUAL "")
+    set_source_files_properties(src/AMDGPU/cdna2/InstructionDecoder-amdgpu-cdna2.C
+                                PROPERTIES COMPILE_FLAGS "${finalizeOperandsExtraFlags}")
 endif()
 
-dyninst_library(instructionAPI
-    SOURCES
-        ${SRC_LIST}
-    COMPILE_DEFINITIONS
-        PRIVATE INSTRUCTION_LIB ${_PRIVATE_COMPILE_DEFS}
-    INCLUDE_DIRECTORIES
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/h>
-    LINK_LIBRARIES
-        Dyninst::headers
-        Dyninst::common
-)
+dyninst_library(
+    instructionAPI
+    SOURCES ${SRC_LIST}
+    COMPILE_DEFINITIONS PRIVATE INSTRUCTION_LIB ${_PRIVATE_COMPILE_DEFS}
+    INCLUDE_DIRECTORIES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/h>
+    LINK_LIBRARIES Dyninst::headers Dyninst::common)

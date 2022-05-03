@@ -1,12 +1,15 @@
-
 include_guard(DIRECTORY)
 
 set(DYNINST_SOVERSION "${DYNINST_MAJOR_VERSION}.${DYNINST_MINOR_VERSION}")
 
 if(CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_CONFIGURATION_TYPES Debug Release)
-    set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-        "Reset the available configurations to exclude MinSizeRel and RelWithDebugInfo" FORCE)
+    set(CMAKE_CONFIGURATION_TYPES
+        "${CMAKE_CONFIGURATION_TYPES}"
+        CACHE
+            STRING
+            "Reset the available configurations to exclude MinSizeRel and RelWithDebugInfo"
+            FORCE)
 endif()
 
 if(LIGHTWEIGHT_SYMTAB)
@@ -20,10 +23,7 @@ include(DyninstUtilities)
 
 # create a dummy target so one can do things like:
 #
-#   if(NOT UNIX)
-#       add_library(Dyninst::dynElf ALIAS dynDummy)
-#       return()
-#   endif()
+# if(NOT UNIX) add_library(Dyninst::dynElf ALIAS dynDummy) return() endif()
 #
 # and, later, just "link" to Dyninst::dynElf even though it doesn't really exist
 if(NOT TARGET dynDummy)
@@ -54,29 +54,22 @@ endif()
 
 function(dyninst_library TARG_NAME)
     # boolean options
-    set(_boolean_opts
-        BUILD_SHARED
-        BUILD_STATIC
-    )
+    set(_boolean_opts BUILD_SHARED BUILD_STATIC)
     # options taking single value
-    set(_single_val_opts
-        DESTINATION
-        DEFAULT_VISIBILITY
-    )
+    set(_single_val_opts DESTINATION DEFAULT_VISIBILITY)
     # options taking multiple values
     set(_multi_val_opts
         HEADERS
         SOURCES
         DEPENDS
-        INCLUDE_DIRECTORIES     # NOT affected by DEFAULT_VISIBILITY
-        COMPILE_DEFINITIONS     # affected by DEFAULT_VISIBILITY
-        COMPILE_FEATURES        # affected by DEFAULT_VISIBILITY
-        COMPILE_OPTIONS         # affected by DEFAULT_VISIBILITY
-        LINK_LIBRARIES          # affected by DEFAULT_VISIBILITY
-        LINK_DIRECTORIES        # affected by DEFAULT_VISIBILITY
-        LINK_OPTIONS            # affected by DEFAULT_VISIBILITY
-        PROPERTIES
-    )
+        INCLUDE_DIRECTORIES # NOT affected by DEFAULT_VISIBILITY
+        COMPILE_DEFINITIONS # affected by DEFAULT_VISIBILITY
+        COMPILE_FEATURES # affected by DEFAULT_VISIBILITY
+        COMPILE_OPTIONS # affected by DEFAULT_VISIBILITY
+        LINK_LIBRARIES # affected by DEFAULT_VISIBILITY
+        LINK_DIRECTORIES # affected by DEFAULT_VISIBILITY
+        LINK_OPTIONS # affected by DEFAULT_VISIBILITY
+        PROPERTIES)
 
     macro(_dyninst_library_set_default _VAR)
         if(NOT DEFINED ${_VAR} OR "${${_VAR}}" STREQUAL "")
@@ -84,26 +77,22 @@ function(dyninst_library TARG_NAME)
         endif()
     endmacro()
 
-    cmake_parse_arguments(
-        TARG
-        "${_boolean_opts}"
-        "${_single_val_opts}"
-        "${_multi_val_opts}"
-        ${ARGN}
-    )
+    cmake_parse_arguments(TARG "${_boolean_opts}" "${_single_val_opts}"
+                          "${_multi_val_opts}" ${ARGN})
 
     # all the targets
     set(ADDED_TARGETS)
 
     # local headers
-    file(GLOB _DEFAILT_TARG_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/h/*.h" "${CMAKE_CURRENT_BINARY_DIR}/h/*.h")
+    file(GLOB _DEFAILT_TARG_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/h/*.h"
+         "${CMAKE_CURRENT_BINARY_DIR}/h/*.h")
 
     # set default values
     _dyninst_library_set_default(TARG_DEFAULT_VISIBILITY PUBLIC)
-    _dyninst_library_set_default(TARG_DESTINATION        ${INSTALL_LIB_DIR})
-    _dyninst_library_set_default(TARG_HEADERS            ${_DEFAILT_TARG_HEADERS})
-    _dyninst_library_set_default(BUILD_SHARED_LIBS       ON)
-    _dyninst_library_set_default(BUILD_STATIC_LIBS       OFF)
+    _dyninst_library_set_default(TARG_DESTINATION ${INSTALL_LIB_DIR})
+    _dyninst_library_set_default(TARG_HEADERS ${_DEFAILT_TARG_HEADERS})
+    _dyninst_library_set_default(BUILD_SHARED_LIBS ON)
+    _dyninst_library_set_default(BUILD_STATIC_LIBS OFF)
 
     if(BUILD_SHARED_LIBS OR TARG_BUILD_SHARED)
         add_library(${TARG_NAME} SHARED)
@@ -138,7 +127,7 @@ function(dyninst_library TARG_NAME)
     foreach(_target ${ADDED_TARGETS})
 
         foreach(_DEP ${TARG_DEPENDS})
-            if(TARGET ${_DEP})  # dependencies must always be a target
+            if(TARGET ${_DEP}) # dependencies must always be a target
                 add_dependencies(${_target} ${_DEP})
             endif()
         endforeach()
@@ -152,19 +141,24 @@ function(dyninst_library TARG_NAME)
         # have headers with same name, e.g. common/h/util.h and parseAPI/src/util.h. With
         # BEFORE + PRIVATE, there is a way to prioritize include paths in the build tree
         # and not have that BEFORE propagate because of the PRIVATE. See example in
-        # parseAPI/CMakeLists.txt. Furthermore, PRIVATE forces it be explicit when a subfolder
-        # depends on a header in another subfolder's src folder, e.g. dynC_API/CMakeLists.txt
-        target_compile_definitions(${_target} ${TARG_DEFAULT_VISIBILITY} ${TARG_COMPILE_DEFINITIONS})
-        target_compile_features(${_target} ${TARG_DEFAULT_VISIBILITY} ${TARG_COMPILE_FEATURES})
-        target_compile_options(${_target} ${TARG_DEFAULT_VISIBILITY} ${TARG_COMPILE_OPTIONS})
-        target_link_directories(${_target} ${TARG_DEFAULT_VISIBILITY} ${TARG_LINK_DIRECTORIES})
+        # parseAPI/CMakeLists.txt. Furthermore, PRIVATE forces it be explicit when a
+        # subfolder depends on a header in another subfolder's src folder, e.g.
+        # dynC_API/CMakeLists.txt
+        target_compile_definitions(${_target} ${TARG_DEFAULT_VISIBILITY}
+                                              ${TARG_COMPILE_DEFINITIONS})
+        target_compile_features(${_target} ${TARG_DEFAULT_VISIBILITY}
+                                           ${TARG_COMPILE_FEATURES})
+        target_compile_options(${_target} ${TARG_DEFAULT_VISIBILITY}
+                               ${TARG_COMPILE_OPTIONS})
+        target_link_directories(${_target} ${TARG_DEFAULT_VISIBILITY}
+                                ${TARG_LINK_DIRECTORIES})
         target_link_options(${_target} ${TARG_DEFAULT_VISIBILITY} ${TARG_LINK_OPTIONS})
 
         # default link visibility
         set(_LINK_VISIBILITY ${TARG_DEFAULT_VISIBILITY})
 
-        # special handling of target_link_libraries to make sure static libraries
-        # link to static targets when a static target exists
+        # special handling of target_link_libraries to make sure static libraries link to
+        # static targets when a static target exists
         foreach(_LINK_LIB ${TARG_LINK_LIBRARIES})
             # if encounter a visibility entry, store it and more to next iteration
             if("${_LINK_LIB}" MATCHES "^(INTERFACE|PUBLIC|PRIVATE)$")
@@ -176,7 +170,9 @@ function(dyninst_library TARG_NAME)
                 set(_LINK_LIB ${_LINK_LIB}-static)
             endif()
             if(DYNINST_DEBUG_CMAKE)
-                dyninst_message(STATUS "target_link_libraries(${_target} ${_LINK_VISIBILITY} ${_LINK_LIB})")
+                dyninst_message(
+                    STATUS
+                    "target_link_libraries(${_target} ${_LINK_VISIBILITY} ${_LINK_LIB})")
             endif()
             target_link_libraries(${_target} ${_LINK_VISIBILITY} ${_LINK_LIB})
         endforeach()
@@ -186,21 +182,24 @@ function(dyninst_library TARG_NAME)
             target_link_libraries(${_target} PRIVATE OpenMP::OpenMP_C OpenMP::OpenMP_CXX)
         endif()
 
-        set_target_properties(${_target} PROPERTIES
-            OUTPUT_NAME             ${TARG_NAME}
-            SOVERSION               ${DYNINST_SOVERSION}    # ignored for static libs
-            VERSION                 ${DYNINST_VERSION}      # ignored for static libs
-            PUBLIC_HEADER           "${TARG_HEADERS}"
-            CLEAN_DIRECT_OUTPUT     1
-            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            ${TARG_PROPERTIES}   # generic variable
-        )
+        set_target_properties(
+            ${_target}
+            PROPERTIES OUTPUT_NAME ${TARG_NAME}
+                       SOVERSION ${DYNINST_SOVERSION} # ignored for static libs
+                       VERSION ${DYNINST_VERSION} # ignored for static libs
+                       PUBLIC_HEADER "${TARG_HEADERS}"
+                       CLEAN_DIRECT_OUTPUT 1
+                       LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                       ${TARG_PROPERTIES} # generic variable
+            )
 
-        add_custom_target(${_target}-install
+        add_custom_target(
+            ${_target}-install
             DEPENDS ${_target}
             COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake)
 
-        install(TARGETS ${_target}
+        install(
+            TARGETS ${_target}
             EXPORT ${TARG_NAME}Targets
             COMPONENT ${TARG_NAME}
             RUNTIME DESTINATION ${TARG_DESTINATION}
@@ -210,19 +209,20 @@ function(dyninst_library TARG_NAME)
     endforeach()
 
     if(ADDED_TARGETS)
-        install(EXPORT ${TARG_NAME}Targets
+        install(
+            EXPORT ${TARG_NAME}Targets
             NAMESPACE ${PROJECT_NAME}::
             DESTINATION ${INSTALL_CMAKE_DIR})
 
-        export(TARGETS  ${ADDED_TARGETS}
-            NAMESPACE   ${PROJECT_NAME}::
-            FILE        ${PROJECT_BINARY_DIR}/build-tree/${TARG_NAME}Targets.cmake
+        export(
+            TARGETS ${ADDED_TARGETS}
+            NAMESPACE ${PROJECT_NAME}::
+            FILE ${PROJECT_BINARY_DIR}/build-tree/${TARG_NAME}Targets.cmake
             EXPORT_LINK_INTERFACE_LIBRARIES)
     endif()
 
     dyninst_append_property_list(ALL_DYNINST_TARGETS ${TARG_NAME})
 endfunction()
-
 
 include(DyninstPlatform)
 include(DyninstCapArchDef)
@@ -232,14 +232,24 @@ include(DyninstOptions)
 include(DyninstOptimization)
 include(DyninstEndian)
 
-set(INSTALL_BIN_DIR     bin                         CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR     lib                         CACHE PATH "Installation directory for libraries")
-set(INSTALL_INCLUDE_DIR include                     CACHE PATH "Installation directory for header files")
-set(INSTALL_CMAKE_DIR   lib/cmake/${PROJECT_NAME}   CACHE PATH "Installation directory for CMake files")
-set(INSTALL_DOC_DIR     share/doc                   CACHE PATH "Installation directory for manuals")
+set(INSTALL_BIN_DIR
+    bin
+    CACHE PATH "Installation directory for executables")
+set(INSTALL_LIB_DIR
+    lib
+    CACHE PATH "Installation directory for libraries")
+set(INSTALL_INCLUDE_DIR
+    include
+    CACHE PATH "Installation directory for header files")
+set(INSTALL_CMAKE_DIR
+    lib/cmake/${PROJECT_NAME}
+    CACHE PATH "Installation directory for CMake files")
+set(INSTALL_DOC_DIR
+    share/doc
+    CACHE PATH "Installation directory for manuals")
 
-# provide an absolute path (if needed) but do not rewrite the with absolute
-# path because CPack only bundles install commands which use relative paths
+# provide an absolute path (if needed) but do not rewrite the with absolute path because
+# CPack only bundles install commands which use relative paths
 foreach(p BIN LIB INCLUDE CMAKE)
     set(INSTALL_${p}_FULL_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}_DIR}")
 endforeach()
@@ -255,6 +265,9 @@ endif()
 
 # set default configuration type
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-       "Choose the build type (None, Debug, Release, RelWithDebInfo, MinSizeRel)" FORCE)
+    set(CMAKE_BUILD_TYPE
+        RelWithDebInfo
+        CACHE STRING
+              "Choose the build type (None, Debug, Release, RelWithDebInfo, MinSizeRel)"
+              FORCE)
 endif()

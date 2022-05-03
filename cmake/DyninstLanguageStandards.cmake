@@ -1,16 +1,20 @@
-#=========================================================================
+# =========================================================================
 # LanguageStandards.cmake
 #
 # Configure C++ and C Language API and ABI standards for Dyninst
 #
-#=========================================================================
+# =========================================================================
 
 #
 # C/C++ language standard cmake options.
 #
 
-set(DYNINST_CXX_LANGUAGE_STANDARD "11" CACHE STRING "C++ language standard version.")
-set(DYNINST_C_LANGUAGE_STANDARD "11" CACHE STRING "C language standard version.")
+set(DYNINST_CXX_LANGUAGE_STANDARD
+    "11"
+    CACHE STRING "C++ language standard version.")
+set(DYNINST_C_LANGUAGE_STANDARD
+    "11"
+    CACHE STRING "C language standard version.")
 
 #
 # --------  C++ language features ----------------
@@ -30,7 +34,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         message(FATAL_ERROR "Dyninst requires gcc >= 6.0")
     endif()
 endif()
-
 
 #
 # --------  C language features ----------------

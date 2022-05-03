@@ -1,9 +1,9 @@
-#======================================================================================
+# ======================================================================================
 # elfutils.cmake
 #
 # Configure elfutils for Dyninst
 #
-#   ----------------------------------------
+# ----------------------------------------
 #
 # Accepts the following CMake variables
 #
@@ -15,25 +15,25 @@
 # Directly exports the following CMake variables
 #
 # ElfUtils_ROOT_DIR       - Computed base directory the of elfutils installation
-# ElfUtils_INCLUDE_DIRS   - elfutils include directories
-# ElfUtils_LIBRARY_DIRS   - Link directories for elfutils libraries
-# ElfUtils_LIBRARIES      - elfutils library files
+# ElfUtils_INCLUDE_DIRS   - elfutils include directories ElfUtils_LIBRARY_DIRS   - Link
+# directories for elfutils libraries ElfUtils_LIBRARIES      - elfutils library files
 #
-# NOTE:
-# The exported ElfUtils_ROOT_DIR can be different from the value provided by the user
-# in the case that it is determined to build elfutils from source. In such a case,
+# NOTE: The exported ElfUtils_ROOT_DIR can be different from the value provided by the
+# user in the case that it is determined to build elfutils from source. In such a case,
 # ElfUtils_ROOT_DIR will contain the directory of the from-source installation.
 #
 # See Modules/FindLibElf.cmake and Modules/FindLibDwarf.cmake for details
 #
-#======================================================================================
+# ======================================================================================
 
 include_guard(GLOBAL)
 
 # always provide Dyninst::ElfUtils even if it is a dummy
 dyninst_add_interface_library(ElfUtils "ElfUtils interface library")
 
-if(LibElf_FOUND AND LibDwarf_FOUND AND NOT ENABLE_DEBUGINFOD)
+if(LibElf_FOUND
+   AND LibDwarf_FOUND
+   AND NOT ENABLE_DEBUGINFOD)
     return()
 endif()
 
@@ -41,25 +41,36 @@ if(NOT UNIX)
     return()
 endif()
 
-# Minimum acceptable version of elfutils
-# NB: We need >=0.186 because of NVIDIA line map extensions
+# Minimum acceptable version of elfutils NB: We need >=0.186 because of NVIDIA line map
+# extensions
 set(_min_version 0.186)
 
-set(ElfUtils_MIN_VERSION ${_min_version} CACHE STRING "Minimum acceptable elfutils version")
+set(ElfUtils_MIN_VERSION
+    ${_min_version}
+    CACHE STRING "Minimum acceptable elfutils version")
 if(${ElfUtils_MIN_VERSION} VERSION_LESS ${_min_version})
-    dyninst_message(FATAL_ERROR "Requested version ${ElfUtils_MIN_VERSION} is less than minimum supported version (${_min_version})")
+    dyninst_message(
+        FATAL_ERROR
+        "Requested version ${ElfUtils_MIN_VERSION} is less than minimum supported version (${_min_version})"
+        )
 endif()
 
 # -------------- PATHS --------------------------------------------------------
 
 # Base directory the of elfutils installation
-set(ElfUtils_ROOT_DIR "/usr" CACHE PATH "Base directory the of elfutils installation")
+set(ElfUtils_ROOT_DIR
+    "/usr"
+    CACHE PATH "Base directory the of elfutils installation")
 
 # Hint directory that contains the elfutils headers files
-set(ElfUtils_INCLUDEDIR "${ElfUtils_ROOT_DIR}/include" CACHE PATH "Hint directory that contains the elfutils headers files")
+set(ElfUtils_INCLUDEDIR
+    "${ElfUtils_ROOT_DIR}/include"
+    CACHE PATH "Hint directory that contains the elfutils headers files")
 
 # Hint directory that contains the elfutils library files
-set(ElfUtils_LIBRARYDIR "${ElfUtils_ROOT_DIR}/lib" CACHE PATH "Hint directory that contains the elfutils library files")
+set(ElfUtils_LIBRARYDIR
+    "${ElfUtils_ROOT_DIR}/lib"
+    CACHE PATH "Hint directory that contains the elfutils library files")
 
 # libelf/dwarf-specific directory hints
 foreach(l LibElf LibDwarf LibDebuginfod)
@@ -76,18 +87,22 @@ if(NOT BUILD_ELFUTILS)
     # Don't search for libdw or libdebuginfod if we didn't find a suitable libelf
     if(LibElf_FOUND)
         find_package(LibDwarf ${ElfUtils_MIN_VERSION})
-        if (ENABLE_DEBUGINFOD)
+        if(ENABLE_DEBUGINFOD)
             find_package(LibDebuginfod ${ElfUtils_MIN_VERSION} REQUIRED)
         endif()
     endif()
 endif()
 
 # -------------- SOURCE BUILD -------------------------------------------------
-if(LibElf_FOUND AND LibDwarf_FOUND AND (NOT ENABLE_DEBUGINFOD OR LibDebuginfod_FOUND))
+if(LibElf_FOUND
+   AND LibDwarf_FOUND
+   AND (NOT ENABLE_DEBUGINFOD OR LibDebuginfod_FOUND))
     if(ENABLE_DEBUGINFOD AND LibDebuginfod_FOUND)
         set(_eu_root ${ElfUtils_ROOT_DIR})
-        set(_eu_inc_dirs ${LibElf_INCLUDE_DIRS} ${LibDwarf_INCLUDE_DIRS} ${LibDebuginfod_INCLUDE_DIRS})
-        set(_eu_lib_dirs ${LibElf_LIBRARY_DIRS} ${LibDwarf_LIBRARY_DIRS} ${LibDebuginfod_LIBRARY_DIRS})
+        set(_eu_inc_dirs ${LibElf_INCLUDE_DIRS} ${LibDwarf_INCLUDE_DIRS}
+                         ${LibDebuginfod_INCLUDE_DIRS})
+        set(_eu_lib_dirs ${LibElf_LIBRARY_DIRS} ${LibDwarf_LIBRARY_DIRS}
+                         ${LibDebuginfod_LIBRARY_DIRS})
         set(_eu_libs ${LibElf_LIBRARIES} ${LibDwarf_LIBRARIES} ${LibDebuginfod_LIBRARIES})
     else()
         set(_eu_root ${ElfUtils_ROOT_DIR})
@@ -96,22 +111,34 @@ if(LibElf_FOUND AND LibDwarf_FOUND AND (NOT ENABLE_DEBUGINFOD OR LibDebuginfod_F
         set(_eu_libs ${LibElf_LIBRARIES} ${LibDwarf_LIBRARIES})
     endif()
 elseif(NOT (LibElf_FOUND AND LibDwarf_FOUND) AND STERILE_BUILD)
-    dyninst_message(FATAL_ERROR "ElfUtils not found and cannot be downloaded because build is sterile.")
+    dyninst_message(
+        FATAL_ERROR
+        "ElfUtils not found and cannot be downloaded because build is sterile.")
 elseif(NOT BUILD_ELFUTILS)
-    dyninst_message(FATAL_ERROR "ElfUtils was not found. Either configure cmake to find ElfUtils properly or set BUILD_ELFUTILS=ON to download and build")
+    dyninst_message(
+        FATAL_ERROR
+        "ElfUtils was not found. Either configure cmake to find ElfUtils properly or set BUILD_ELFUTILS=ON to download and build"
+        )
 else()
     # If we didn't find a suitable version on the system, then download one from the web
-    dyninst_add_cache_option(ELFUTILS_DOWNLOAD_VERSION "0.182" CACHE STRING "Version of elfutils to download and install")
+    dyninst_add_cache_option(ELFUTILS_DOWNLOAD_VERSION "0.182"
+                             CACHE STRING "Version of elfutils to download and install")
 
     # make sure we are not downloading a version less than minimum
     if(${ELFUTILS_DOWNLOAD_VERSION} VERSION_LESS ${ElfUtils_MIN_VERSION})
-        dyninst_message(FATAL_ERROR "elfutils download version is set to ${ELFUTILS_DOWNLOAD_VERSION} but elfutils minimum version is set to ${ElfUtils_MIN_VERSION}")
+        dyninst_message(
+            FATAL_ERROR
+            "elfutils download version is set to ${ELFUTILS_DOWNLOAD_VERSION} but elfutils minimum version is set to ${ElfUtils_MIN_VERSION}"
+            )
     endif()
 
     dyninst_message(STATUS "${ElfUtils_ERROR_REASON}")
-    dyninst_message( STATUS "Attempting to build elfutils(${ELFUTILS_DOWNLOAD_VERSION}) as external project")
+    dyninst_message(
+        STATUS
+        "Attempting to build elfutils(${ELFUTILS_DOWNLOAD_VERSION}) as external project")
 
-    if(NOT (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU") OR NOT (${CMAKE_C_COMPILER_ID} STREQUAL "GNU"))
+    if(NOT (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU") OR NOT (${CMAKE_C_COMPILER_ID}
+                                                             STREQUAL "GNU"))
         dyninst_message(FATAL_ERROR "ElfUtils will only build with the GNU compiler")
     endif()
 
@@ -122,18 +149,16 @@ else()
         URL https://sourceware.org/elfutils/ftp/${ELFUTILS_DOWNLOAD_VERSION}/elfutils-${ELFUTILS_DOWNLOAD_VERSION}.tar.bz2
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND
-        CFLAGS=-fPIC CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
-        <SOURCE_DIR>/configure
-        --enable-install-elfh
-        --prefix=${CMAKE_INSTALL_PREFIX}/lib/dyninst-tpls
-        --disable-libdebuginfod
-        --disable-debuginfod
+            CFLAGS=-fPIC CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
+            <SOURCE_DIR>/configure --enable-install-elfh
+            --prefix=${CMAKE_INSTALL_PREFIX}/lib/dyninst-tpls --disable-libdebuginfod
+            --disable-debuginfod
         BUILD_COMMAND make install
-        INSTALL_COMMAND ""
-    )
+        INSTALL_COMMAND "")
 
     # target for re-executing the installation
-    add_custom_target(install-elfutils-external
+    add_custom_target(
+        install-elfutils-external
         COMMAND make install
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/elfutils/src/ElfUtils-External
         COMMENT "Installing ElfUtils...")
@@ -145,34 +170,32 @@ else()
         $<INSTALL_INTERFACE:lib/dyninst-tpls/include>
         $<INSTALL_INTERFACE:lib/dyninst-tpls/include/elfutils>)
     set(_eu_lib_dirs
-        $<BUILD_INTERFACE:${_eu_root}/lib>
-        $<BUILD_INTERFACE:${_eu_root}/lib/elfutils>
+        $<BUILD_INTERFACE:${_eu_root}/lib> $<BUILD_INTERFACE:${_eu_root}/lib/elfutils>
         $<INSTALL_INTERFACE:lib/dyninst-tpls/lib>
         $<INSTALL_INTERFACE:lib/dyninst-tpls/lib/elfutils>)
     set(_eu_libs
         $<BUILD_INTERFACE:${_eu_root}/lib/libdw${CMAKE_SHARED_LIBRARY_SUFFIX}>
         $<BUILD_INTERFACE:${_eu_root}/lib/libelf${CMAKE_SHARED_LIBRARY_SUFFIX}>
-        $<INSTALL_INTERFACE:dw>
-        $<INSTALL_INTERFACE:elf>)
+        $<INSTALL_INTERFACE:dw> $<INSTALL_INTERFACE:elf>)
 endif()
 
 # -------------- EXPORT VARIABLES ---------------------------------------------
 
-set(ElfUtils_ROOT_DIR ${_eu_root}
-    CACHE PATH "Base directory the of elfutils installation"
-    FORCE)
-set(ElfUtils_INCLUDE_DIRS ${_eu_inc_dirs}
-    CACHE PATH "elfutils include directory"
-    FORCE)
-set(ElfUtils_LIBRARY_DIRS ${_eu_lib_dirs}
-    CACHE PATH "elfutils library directory"
-    FORCE)
-set(ElfUtils_INCLUDE_DIR ${ElfUtils_INCLUDE_DIRS}
-    CACHE PATH "elfutils include directory"
-    FORCE)
-set(ElfUtils_LIBRARIES ${_eu_libs}
-    CACHE FILEPATH "elfutils library files"
-    FORCE)
+set(ElfUtils_ROOT_DIR
+    ${_eu_root}
+    CACHE PATH "Base directory the of elfutils installation" FORCE)
+set(ElfUtils_INCLUDE_DIRS
+    ${_eu_inc_dirs}
+    CACHE PATH "elfutils include directory" FORCE)
+set(ElfUtils_LIBRARY_DIRS
+    ${_eu_lib_dirs}
+    CACHE PATH "elfutils library directory" FORCE)
+set(ElfUtils_INCLUDE_DIR
+    ${ElfUtils_INCLUDE_DIRS}
+    CACHE PATH "elfutils include directory" FORCE)
+set(ElfUtils_LIBRARIES
+    ${_eu_libs}
+    CACHE FILEPATH "elfutils library files" FORCE)
 
 target_include_directories(ElfUtils SYSTEM INTERFACE ${ElfUtils_INCLUDE_DIRS})
 target_compile_definitions(ElfUtils INTERFACE ${ElfUtils_DEFINITIONS})

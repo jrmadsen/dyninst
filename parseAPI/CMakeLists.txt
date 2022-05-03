@@ -1,10 +1,8 @@
 # CMake configuration for parseAPI directory
 
-include_directories (
-    ${PROJECT_SOURCE_DIR}/parseAPI/src
-  )
+include_directories(${PROJECT_SOURCE_DIR}/parseAPI/src)
 
-set (SRC_LIST
+set(SRC_LIST
     src/ParserDetails.C
     src/Parser.C
     src/CFGFactory.C
@@ -38,8 +36,7 @@ set (SRC_LIST
     src/Loop.C
     src/LoopTreeNode.C
     src/IdiomModelDesc.C
-    src/ProbabilisticParser.C
-)
+    src/ProbabilisticParser.C)
 
 set(ROSE_SRC
     ${PROJECT_SOURCE_DIR}/dataflowAPI/src/ABI.C
@@ -81,22 +78,19 @@ set(ROSE_SRC
     ${PROJECT_SOURCE_DIR}/dataflowAPI/rose/semantics/Registers.C
     ${PROJECT_SOURCE_DIR}/dataflowAPI/rose/semantics/BinarySymbolicExpr.C
     ${PROJECT_SOURCE_DIR}/dataflowAPI/rose/semantics/RegisterStateGeneric.C
-    ${PROJECT_SOURCE_DIR}/dataflowAPI/rose/semantics/SymEvalSemantics.C
-)
+    ${PROJECT_SOURCE_DIR}/dataflowAPI/rose/semantics/SymEvalSemantics.C)
 
 # FIXME: Rose needs a bunch of warning cleanup
-SET_SOURCE_FILES_PROPERTIES(${ROSE_SRC} PROPERTIES LANGUAGE CXX COMPILE_FLAGS -w)
-set (SRC_LIST ${SRC_LIST}
-	${ROSE_SRC}
-)
+set_source_files_properties(${ROSE_SRC} PROPERTIES LANGUAGE CXX COMPILE_FLAGS -w)
+set(SRC_LIST ${SRC_LIST} ${ROSE_SRC})
 
-if (LIGHTWEIGHT_SYMTAB)
+if(LIGHTWEIGHT_SYMTAB)
     list(APPEND SRC_LIST src/SymLiteCodeSource.C)
 else()
     list(APPEND SRC_LIST src/SymtabCodeSource.C)
 endif()
 
-if (ENABLE_PARSE_API_GRAPHS)
+if(ENABLE_PARSE_API_GRAPHS)
     list(APPEND SRC_LIST src/GraphAdapter.C)
 endif()
 
@@ -106,27 +100,16 @@ if(WIN32)
     list(APPEND _PRIVATE_COMPILE_DEFS ROSE_UTIL_EXPORTS NOMINMAX)
 endif()
 
-file(GLOB HDR_LIST "${CMAKE_CURRENT_LIST_DIR}/h/*.h" "${PROJECT_SOURCE_DIR}/dataflowAPI/h/*.h")
+file(GLOB HDR_LIST "${CMAKE_CURRENT_LIST_DIR}/h/*.h"
+     "${PROJECT_SOURCE_DIR}/dataflowAPI/h/*.h")
 
-dyninst_library(parseAPI
-    HEADERS
-        ${HDR_LIST}
-    SOURCES
-        ${SRC_LIST} ${ROSE_SRC}
-    COMPILE_DEFINITIONS
-        PRIVATE
-            PARSER_LIB
-            DATAFLOW_LIB
-            ${_PRIVATE_COMPILE_DEFS}
-    INCLUDE_DIRECTORIES
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/common/h>
-    LINK_LIBRARIES
-        Dyninst::headers
-        Dyninst::common
-        Dyninst::instructionAPI
-        Dyninst::${SYMREADER}
-        PRIVATE
-            Dyninst::dynWinShlwapi
-)
+dyninst_library(
+    parseAPI
+    HEADERS ${HDR_LIST}
+    SOURCES ${SRC_LIST} ${ROSE_SRC}
+    COMPILE_DEFINITIONS PRIVATE PARSER_LIB DATAFLOW_LIB ${_PRIVATE_COMPILE_DEFS}
+    INCLUDE_DIRECTORIES $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/common/h>
+    LINK_LIBRARIES Dyninst::headers Dyninst::common Dyninst::instructionAPI
+                   Dyninst::${SYMREADER} PRIVATE Dyninst::dynWinShlwapi)
 
 dyninst_message(STATUS "Architecture is: ${CMAKE_LIBRARY_ARCHITECTURE}")

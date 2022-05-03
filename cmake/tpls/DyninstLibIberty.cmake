@@ -1,25 +1,23 @@
-#======================================================================================
+# ======================================================================================
 # LibIberty.cmake
 #
 # Configure LibIberty for Dyninst
 #
-#   ----------------------------------------
+# ----------------------------------------
 #
 # Directly exports the following CMake variables
 #
 # LibIberty_ROOT_DIR       - Computed base directory the of LibIberty installation
-# LibIberty_LIBRARY_DIRS   - Link directories for LibIberty libraries
-# LibIberty_LIBRARIES      - LibIberty library files
-# LibIberty_INCLUDE        - LibIberty include files
+# LibIberty_LIBRARY_DIRS   - Link directories for LibIberty libraries LibIberty_LIBRARIES
+# - LibIberty library files LibIberty_INCLUDE        - LibIberty include files
 #
-# NOTE:
-# The exported LibIberty_ROOT_DIR can be different from the value provided by the user
-# in the case that it is determined to build LibIberty from source. In such a case,
+# NOTE: The exported LibIberty_ROOT_DIR can be different from the value provided by the
+# user in the case that it is determined to build LibIberty from source. In such a case,
 # LibIberty_ROOT_DIR will contain the directory of the from-source installation.
 #
 # See Modules/FindLibIberty.cmake for details
 #
-#======================================================================================
+# ======================================================================================
 
 include_guard(GLOBAL)
 
@@ -33,11 +31,13 @@ endif()
 # -------------- PATHS --------------------------------------------------------
 
 # Base directory the of LibIberty installation
-set(LibIberty_ROOT_DIR "/usr"
+set(LibIberty_ROOT_DIR
+    "/usr"
     CACHE PATH "Base directory the of LibIberty installation")
 
 # Hint directory that contains the LibIberty library files
-set(LibIberty_LIBRARYDIR "${LibIberty_ROOT_DIR}/lib"
+set(LibIberty_LIBRARYDIR
+    "${LibIberty_ROOT_DIR}/lib"
     CACHE PATH "Hint directory that contains the LibIberty library files")
 
 # -------------- PACKAGES -----------------------------------------------------
@@ -53,32 +53,37 @@ if(LibIberty_FOUND)
     set(_li_lib_dirs ${LibIberty_LIBRARY_DIRS})
     set(_li_libs ${LibIberty_LIBRARIES})
 elseif(STERILE_BUILD)
-    dyninst_message(FATAL_ERROR "LibIberty not found and cannot be downloaded because build is sterile.")
+    dyninst_message(
+        FATAL_ERROR
+        "LibIberty not found and cannot be downloaded because build is sterile.")
 elseif(NOT BUILD_LIBIBERTY)
-    dyninst_message(FATAL_ERROR "LibIberty was not found. Either configure cmake to find TBB properly or set BUILD_LIBIBERTY=ON to download and build")
+    dyninst_message(
+        FATAL_ERROR
+        "LibIberty was not found. Either configure cmake to find TBB properly or set BUILD_LIBIBERTY=ON to download and build"
+        )
 else()
     dyninst_message(STATUS "${LibIberty_ERROR_REASON}")
     dyninst_message(STATUS "Attempting to build LibIberty as external project")
 
     include(ExternalProject)
-    ExternalProject_Add(
+    externalproject_add(
         LibIberty-External
         PREFIX ${CMAKE_BINARY_DIR}/binutils
         URL http://ftp.gnu.org/gnu/binutils/binutils-2.31.1.tar.gz
         BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND
-        CFLAGS=-fPIC
-        CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
-        <SOURCE_DIR>/configure --prefix=${CMAKE_BINARY_DIR}/binutils
+        CONFIGURE_COMMAND CFLAGS=-fPIC CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
+                          <SOURCE_DIR>/configure --prefix=${CMAKE_BINARY_DIR}/binutils
         BUILD_COMMAND make
         INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/dyninst-tpls/lib/libiberty
-        INSTALL_COMMAND
-        install <SOURCE_DIR>/libiberty/libiberty.a <INSTALL_DIR>
-    )
+        INSTALL_COMMAND install <SOURCE_DIR>/libiberty/libiberty.a <INSTALL_DIR>)
 
     # target for re-executing the installation
-    add_custom_target(install-libiberty-external
-        COMMAND install ${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External/libiberty/libiberty.a ${CMAKE_INSTALL_PREFIX}/lib/dyninst-tpls/lib/libiberty
+    add_custom_target(
+        install-libiberty-external
+        COMMAND
+            install
+            ${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External/libiberty/libiberty.a
+            ${CMAKE_INSTALL_PREFIX}/lib/dyninst-tpls/lib/libiberty
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/binutils/src/LibIberty-External
         COMMENT "Installing LibIberty...")
 
@@ -110,13 +115,17 @@ target_include_directories(LibIberty INTERFACE ${_li_inc_dirs})
 target_link_directories(LibIberty INTERFACE ${_lib_lib_dirs})
 target_link_libraries(LibIberty INTERFACE ${_li_libs})
 
-set(LibIberty_ROOT_DIR ${_li_root}
+set(LibIberty_ROOT_DIR
+    ${_li_root}
     CACHE PATH "Base directory the of LibIberty installation" FORCE)
-set(LibIberty_INCLUDE_DIRS ${_li_inc_dirs}
+set(LibIberty_INCLUDE_DIRS
+    ${_li_inc_dirs}
     CACHE PATH "LibIberty include directories" FORCE)
-set(LibIberty_LIBRARY_DIRS ${_li_lib_dirs}
+set(LibIberty_LIBRARY_DIRS
+    ${_li_lib_dirs}
     CACHE PATH "LibIberty library directory" FORCE)
-set(LibIberty_LIBRARIES ${_li_libs}
+set(LibIberty_LIBRARIES
+    ${_li_libs}
     CACHE FILEPATH "LibIberty library files" FORCE)
 
 # For backward compatibility only

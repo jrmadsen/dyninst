@@ -6,4 +6,3 @@ if(${BIGENDIAN})
 else()
     add_compile_definitions(DYNINST_LITTLE_ENDIAN)
 endif()
-
