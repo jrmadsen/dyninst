@@ -1,8 +1,9 @@
-INCLUDE(TestBigEndian)
+include(TestBigEndian)
 
-TEST_BIG_ENDIAN(BIGENDIAN)
+test_big_endian(BIGENDIAN)
 if(${BIGENDIAN})
- ADD_DEFINITIONS(-DDYNINST_BIG_ENDIAN)
+    add_compile_definitions(DYNINST_BIG_ENDIAN)
 else()
- ADD_DEFINITIONS(-DDYNINST_LITTLE_ENDIAN)
-endif(${BIGENDIAN})
+    add_compile_definitions(DYNINST_LITTLE_ENDIAN)
+endif()
+

@@ -1,5 +1,6 @@
-if (UNIX)
-include (${DYNINST_ROOT}/cmake/platform_unix.cmake)
-else ()
-include (${DYNINST_ROOT}/cmake/platform_windows.cmake)
+
+if(UNIX)
+    include(DyninstPlatformUnix)
+else()
+    include(DyninstPlatformWindows)
 endif()
