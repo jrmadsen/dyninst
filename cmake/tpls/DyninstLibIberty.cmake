@@ -76,11 +76,21 @@ else()
         )
     set(_li_build_byproducts "${_li_root}/lib/libiberty${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
+    # List of URLS (includes mirrors) to download binutils from.
+    set(TIMEMORY_BINUTILS_DOWNLOAD_URL
+        ""
+        CACHE STRING "URLs for binutils download")
+
+    # Add defualt URLs to download binutils from.
+    list(APPEND TIMEMORY_BINUTILS_DOWNLOAD_URL
+         "http://ftpmirror.gnu.org/gnu/binutils/binutils-2.40.tar.gz"
+         "http://mirrors.kernel.org/sourceware/binutils/releases/binutils-2.40.tar.gz")
+
     include(ExternalProject)
     externalproject_add(
         LibIberty-External
         PREFIX ${PROJECT_BINARY_DIR}/binutils
-        URL http://ftpmirror.gnu.org/gnu/binutils/binutils-2.31.1.tar.gz
+        URL ${TIMEMORY_BINUTILS_DOWNLOAD_URL}
         BUILD_IN_SOURCE 1
         CONFIGURE_COMMAND
             ${CMAKE_COMMAND} -E env CC=${CMAKE_C_COMPILER} CFLAGS=-fPIC\ -O3
