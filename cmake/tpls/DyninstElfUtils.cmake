@@ -145,16 +145,16 @@ else()
     set(_eu_root ${TPL_STAGING_PREFIX})
     set(_eu_inc_dirs $<BUILD_INTERFACE:${_eu_root}/include>
                      $<INSTALL_INTERFACE:${INSTALL_LIB_DIR}/${TPL_INSTALL_INCLUDE_DIR}>)
-    set(_eu_lib_dirs $<BUILD_INTERFACE:${_eu_root}/lib>
+    set(_eu_lib_dirs $<BUILD_INTERFACE:${_eu_root}/${CMAKE_DEFAULT_INSTALL_LIBDIR}>
                      $<INSTALL_INTERFACE:${INSTALL_LIB_DIR}/${TPL_INSTALL_LIB_DIR}>)
     set(_eu_libs
-        $<BUILD_INTERFACE:${_eu_root}/lib/libdw${CMAKE_SHARED_LIBRARY_SUFFIX}>
-        $<BUILD_INTERFACE:${_eu_root}/lib/libelf${CMAKE_SHARED_LIBRARY_SUFFIX}>
+        $<BUILD_INTERFACE:${_eu_root}/${CMAKE_DEFAULT_INSTALL_LIBDIR}/libdw${CMAKE_SHARED_LIBRARY_SUFFIX}>
+        $<BUILD_INTERFACE:${_eu_root}/${CMAKE_DEFAULT_INSTALL_LIBDIR}/libelf${CMAKE_SHARED_LIBRARY_SUFFIX}>
         $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INSTALL_LIB_DIR}/${TPL_INSTALL_LIB_DIR}/libdw${CMAKE_SHARED_LIBRARY_SUFFIX}>
         $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${INSTALL_LIB_DIR}/${TPL_INSTALL_LIB_DIR}/libelf${CMAKE_SHARED_LIBRARY_SUFFIX}>
         )
-    set(_eu_build_byproducts "${_eu_root}/lib/libdw${CMAKE_SHARED_LIBRARY_SUFFIX}"
-                             "${_eu_root}/lib/libelf${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(_eu_build_byproducts "${_eu_root}/${CMAKE_DEFAULT_INSTALL_LIBDIR}/libdw${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                             "${_eu_root}/${CMAKE_DEFAULT_INSTALL_LIBDIR}/libelf${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
     include(ExternalProject)
     externalproject_add(
